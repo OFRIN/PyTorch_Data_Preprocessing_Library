@@ -26,8 +26,8 @@ if __name__ == '__main__':
         
         loader = Loader(queue=queue_of_loader, file_paths=file_paths, the_number_of_loading_file=the_number_of_loading_file)
         loader.start()
-
-        decoder = Decoder(queue=queue, queue_of_loader=queue_of_loader, batch_size=64, transform=None, the_number_of_element=2, decode_fn=customized_decode_fn)
+        
+        decoder = Decoder(queue=queue, queue_of_loader=queue_of_loader, batch_size=64, transform=None, decode_fn=customized_decode_fn)
         decoder.start()
 
         while True:

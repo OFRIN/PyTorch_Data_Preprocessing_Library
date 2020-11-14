@@ -17,7 +17,6 @@ class Reader_For_Expert:
         transform,
         the_size_of_queue_for_loaders, the_size_of_queue_for_decoders, 
         the_number_of_loader, the_number_of_decoder, 
-        the_number_of_loading_file, the_number_of_element,
         decode_fn
         ):
 
@@ -29,10 +28,8 @@ class Reader_For_Expert:
         self.queue_for_loaders = mp.Queue(maxsize=the_size_of_queue_for_loaders)
 
         self.file_paths = glob.glob(pattern)
-
-        self.the_number_of_element = the_number_of_element
-        self.the_number_of_loading_file = the_number_of_loading_file
-
+        self.the_number_of_loading_file = 5
+        
         self.loaders = [self.make_loader() for _ in range(the_number_of_loader)]
         self.decoders = [self.make_decoder() for _ in range(the_number_of_decoder)]
     
@@ -49,7 +46,6 @@ class Reader_For_Expert:
             queue_of_loader=self.queue_for_loaders,
             batch_size=self.batch_size,
             transform=self.transform,
-            the_number_of_element=self.the_number_of_element,
             decode_fn=self.decode_fn
         )
 
@@ -72,7 +68,6 @@ class Reader_For_Beginner(mp.Process):
         pattern, 
         batch_size,
         transform,
-        the_number_of_element,
         decode_fn
         ):
         super().__init__()
@@ -82,20 +77,22 @@ class Reader_For_Beginner(mp.Process):
         self.transform = transform
         self.decode_fn = decode_fn
 
-        self.the_number_of_element = the_number_of_element
-
         self.queue = mp.Queue(maxsize=5)
 
         self.init()
 
     def init(self):
-        self.batch_dataset = [[] for i in range(self.the_number_of_element)]
+        self.batch_dataset = []
 
     def run(self):
         for path in self.file_path:
             data_dic = load_pickle(path)
             for key in data_dic.keys():
-                for dataset, value in zip(self.batch_dataset, self.decode_fn(data_dic[key], self.transform)):
+                values = self.decode_fn(data_dic[key], self.transform)
+                if len(self.batch_dataset) == 0:
+                    self.batch_dataset = [[] for i in range(len(values))]
+
+                for dataset, value in zip(self.batch_dataset, values):
                     dataset.append(value)
 
                 if len(self.batch_dataset[0]) == self.batch_size:

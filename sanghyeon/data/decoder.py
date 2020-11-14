@@ -14,18 +14,20 @@ class Decoder(mp.Process):
         self.transform = kwargs['transform']
 
         self.decode_fn = kwargs['decode_fn']
-        self.the_number_of_element = kwargs['the_number_of_element']
 
         self.init()
     
     def init(self):
-        self.batch_dataset = [[] for i in range(self.the_number_of_element)]
-
+        self.batch_dataset = []
+    
     def run(self):
         while True:
             for example in self.queue_of_loader.get():
-                # for dataset, value in zip(self.batch_dataset, self.decode_fn(self, example)):
-                for dataset, value in zip(self.batch_dataset, self.decode_fn(example, self.transform)):
+                values = self.decode_fn(example, self.transform)
+                if len(self.batch_dataset) == 0:
+                    self.batch_dataset = [[] for i in range(len(values))]
+
+                for dataset, value in zip(self.batch_dataset, values):
                     dataset.append(value)
                 
                 if len(self.batch_dataset[0]) == self.batch_size:
@@ -39,4 +41,5 @@ class Decoder(mp.Process):
         self.terminate()
         self.join()
                     
+
 

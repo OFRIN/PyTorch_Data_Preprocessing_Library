@@ -12,7 +12,7 @@ if __name__ == '__main__':
 
         loader = Loader(queue=queue, file_paths=file_paths, the_number_of_loading_file=the_number_of_loading_file)
         loader.start()
-
+        
         while True:
             examples = loader.get()
             print(len(examples))
