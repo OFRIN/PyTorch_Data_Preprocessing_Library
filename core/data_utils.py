@@ -5,27 +5,9 @@ import numpy as np
 from torchvision import datasets
 from torchvision import transforms
 
-from sanghyeon.utility.utils import *
-
-from sanghyeon.utility.txt_utils import *
-from sanghyeon.utility.json_utils import *
-
-class Iterator:
-    def __init__(self, loader):
-        self.loader = loader
-        self.init()
-
-    def init(self):
-        self.iterator = iter(self.loader)
-
-    def get(self):
-        try:
-            xs, ys = next(self.iterator)
-        except StopIteration:
-            self.init()
-            xs, ys = next(self.iterator)
-
-        return xs, ys
+from utility.utils import *
+from utility.txt_utils import *
+from utility.json_utils import *
 
 class Custom_Dataset(torch.utils.data.Dataset):
     def __init__(self, dataset, indices=None, transform=None):
