@@ -10,18 +10,20 @@ from .decoder import Decoder
 from .utils import decode_image
 from .utils import load_pickle
 
-class Reader_For_Training:
+class Reader_For_Expert:
     def __init__(self, 
         pattern,
         batch_size,
         transform,
         the_size_of_queue_for_loaders, the_size_of_queue_for_decoders, 
         the_number_of_loader, the_number_of_decoder, 
-        the_number_of_loading_file, the_number_of_element
+        the_number_of_loading_file, the_number_of_element,
+        decode_fn
         ):
 
         self.batch_size = batch_size
         self.transform = transform
+        self.decode_fn = decode_fn
 
         self.queue_for_decoders = mp.Queue(maxsize=the_size_of_queue_for_decoders)
         self.queue_for_loaders = mp.Queue(maxsize=the_size_of_queue_for_loaders)
@@ -47,7 +49,8 @@ class Reader_For_Training:
             queue_of_loader=self.queue_for_loaders,
             batch_size=self.batch_size,
             transform=self.transform,
-            the_number_of_element=self.the_number_of_element
+            the_number_of_element=self.the_number_of_element,
+            decode_fn=self.decode_fn
         )
 
     def start(self):
@@ -64,18 +67,21 @@ class Reader_For_Training:
     def __next__(self):
         return self.queue_for_decoders.get()
 
-class Reader_For_Testing(mp.Process):
+class Reader_For_Beginner(mp.Process):
     def __init__(self, 
         pattern, 
         batch_size,
         transform,
-        the_number_of_element
+        the_number_of_element,
+        decode_fn
         ):
         super().__init__()
 
         self.file_path = glob.glob(pattern)
         self.batch_size = batch_size
         self.transform = transform
+        self.decode_fn = decode_fn
+
         self.the_number_of_element = the_number_of_element
 
         self.queue = mp.Queue(maxsize=5)
@@ -84,12 +90,12 @@ class Reader_For_Testing(mp.Process):
 
     def init(self):
         self.batch_dataset = [[] for i in range(self.the_number_of_element)]
-    
+
     def run(self):
         for path in self.file_path:
             data_dic = load_pickle(path)
             for key in data_dic.keys():
-                for dataset, value in zip(self.batch_dataset, Decoder.decode_fn(self, data_dic[key])):
+                for dataset, value in zip(self.batch_dataset, self.decode_fn(data_dic[key], self.transform)):
                     dataset.append(value)
 
                 if len(self.batch_dataset[0]) == self.batch_size:
