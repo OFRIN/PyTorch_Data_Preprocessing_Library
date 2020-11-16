@@ -2,7 +2,7 @@ import sys
 import glob
 import multiprocessing as mp
 
-from sanghyeon.data.loader import Loader
+from data.loader import Loader
 
 if __name__ == '__main__':
     try:

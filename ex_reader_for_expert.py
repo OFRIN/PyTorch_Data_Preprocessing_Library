@@ -2,11 +2,11 @@ import numpy as np
 
 from torchvision import transforms
 
-from sanghyeon.utility.utils import convert_OpenCV_to_PIL
-from sanghyeon.utility.utils import convert_PIL_to_OpenCV
+from utility.utils import convert_OpenCV_to_PIL
+from utility.utils import convert_PIL_to_OpenCV
 
-from sanghyeon.data.reader import Reader_For_Expert, Reader_For_Beginner
-from sanghyeon.data.utils import decode_image
+from data.reader import Reader_For_Expert, Reader_For_Beginner
+from data.utils import decode_image
 
 def customized_decode_fn(example, transform):
     image = decode_image(example['encoded_image'])
@@ -31,10 +31,8 @@ if __name__ == '__main__':
             batch_size=64, transform=train_transform,
             the_size_of_queue_for_loaders=5, the_size_of_queue_for_decoders=5,
             the_number_of_loader=1, the_number_of_decoder=2,
-            the_number_of_loading_file=5, the_number_of_element=2,
             decode_fn=customized_decode_fn
         )
-        reader.start()
         
         # while True:
         for i in range(100):

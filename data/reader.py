@@ -32,6 +32,8 @@ class Reader_For_Expert:
         
         self.loaders = [self.make_loader() for _ in range(the_number_of_loader)]
         self.decoders = [self.make_decoder() for _ in range(the_number_of_decoder)]
+
+        self.start_flag = False
     
     def make_loader(self):
         return Loader(
@@ -61,6 +63,10 @@ class Reader_For_Expert:
         return self
 
     def __next__(self):
+        if not self.start_flag:
+            self.start_flag = True
+            self.start()
+            
         return self.queue_for_decoders.get()
 
 class Reader_For_Beginner(mp.Process):
@@ -99,6 +105,11 @@ class Reader_For_Beginner(mp.Process):
                     self.queue.put(copy.deepcopy(self.batch_dataset))
                     self.init()
 
+        if len(self.batch_dataset) > 0:
+            if len(self.batch_dataset[0]) > 0:
+                self.queue.put(copy.deepcopy(self.batch_dataset))
+                self.init()
+        
         self.queue.put(StopIteration)
 
     def __iter__(self):

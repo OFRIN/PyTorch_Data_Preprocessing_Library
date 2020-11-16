@@ -3,10 +3,10 @@ import glob
 import numpy as np
 import multiprocessing as mp
 
-from sanghyeon.data.loader import Loader
-from sanghyeon.data.decoder import Decoder
+from data.loader import Loader
+from data.decoder import Decoder
 
-from sanghyeon.data.utils import decode_image
+from data.utils import decode_image
 
 def customized_decode_fn(example, transform):
     image = decode_image(example['encoded_image'])
@@ -29,7 +29,7 @@ if __name__ == '__main__':
         
         decoder = Decoder(queue=queue, queue_of_loader=queue_of_loader, batch_size=64, transform=None, decode_fn=customized_decode_fn)
         decoder.start()
-
+        
         while True:
             images, labels = decoder.get()
             print(np.shape(images), np.shape(labels))

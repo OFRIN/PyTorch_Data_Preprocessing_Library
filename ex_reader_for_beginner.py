@@ -2,11 +2,11 @@ import numpy as np
 
 from torchvision import transforms
 
-from sanghyeon.utility.utils import convert_OpenCV_to_PIL
-from sanghyeon.utility.utils import convert_PIL_to_OpenCV
+from utility.utils import convert_OpenCV_to_PIL
+from utility.utils import convert_PIL_to_OpenCV
 
-from sanghyeon.data.reader import Reader_For_Expert, Reader_For_Beginner
-from sanghyeon.data.utils import decode_image
+from data.reader import Reader_For_Expert, Reader_For_Beginner
+from data.utils import decode_image
 
 def customized_decode_fn(example, transform):
     image = decode_image(example['encoded_image'])
@@ -30,7 +30,7 @@ if __name__ == '__main__':
             reader = Reader_For_Beginner(
                 pattern='C:/Classification_DB/Flowers-102/train/*',
                 batch_size=64, transform=train_transform,
-                the_number_of_element=2, decode_fn=customized_decode_fn
+                decode_fn=customized_decode_fn
             )
             
             print(f'# {i + 1}')
