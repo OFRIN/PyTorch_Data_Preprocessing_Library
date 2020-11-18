@@ -2,12 +2,14 @@ import torch
 import random
 import numpy as np
 
+from PIL import Image
+
 from torchvision import datasets
 from torchvision import transforms
 
-from utility.utils import *
-from utility.txt_utils import *
-from utility.json_utils import *
+from util.utils import *
+from util.txt_utils import *
+from util.json_utils import *
 
 class Custom_Dataset(torch.utils.data.Dataset):
     def __init__(self, dataset, indices=None, transform=None):
@@ -23,13 +25,6 @@ class Custom_Dataset(torch.utils.data.Dataset):
 
     def __getitem__(self, index):
         image, label = self.dataset[self.indices[index]]
-
-        if len(np.shape(image)) == 2:
-            image = image.convert('RGB')
-
-        if self.transform is not None:
-            image = self.transform(image)
-
         return image, label
 
 def split_train_and_validation_datasets(dataset, classes, ratio=0.1):
@@ -75,15 +70,18 @@ class Dataset(torch.utils.data.Dataset):
     def __getitem__(self, index):
         image_name = self.image_names[index]
 
-        image = cv2.imread(self.data_dir + image_name)
+        # image = cv2.imread(self.data_dir + image_name)
+        try:
+            image = Image.open(self.data_dir + image_name)
+        except:
+            print(self.data_dir + image_name)
+            return None, torch.tensor(-1, dtype=torch.long)
+
+        if image.mode != 'RGB':
+            image = image.convert('RGB')
+
         label = self.labels[index]
-
-        if image is None:
-            print(image_name)
-            # return self.__getitem__(random.randint(0, self.__len__() + 1))
-            return convert_OpenCV_to_PIL(np.zeros((256, 256, 3), dtype=np.uint8)), torch.tensor(-1, dtype=torch.long)
-
-        return convert_OpenCV_to_PIL(image), torch.tensor(label, dtype=torch.long)
+        return image, torch.tensor(label, dtype=torch.long)
 
 def get_dataset_func(name):
     if name == 'Caltech-256':

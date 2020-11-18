@@ -1,3 +1,6 @@
+# Copyright (C) 2020 * Ltd. All rights reserved.
+# author : Sanghyeon Jo <josanghyeokn@gmail.com>
+
 import json
 
 def read_json(filepath):

@@ -1,0 +1,42 @@
+{
+	"Food-101": {
+		"train": 68175,
+		"validation": 7575,
+		"test": 25250
+	},
+	"Caltech-256": {
+		"train": 22068,
+		"validation": 2317,
+		"test": 6222
+	},
+	"CUB-200": {
+		"train": 2800,
+		"validation": 200,
+		"test": 3033
+	},
+	"DTD": {
+		"train": 5593,
+		"validation": 5593,
+		"test": 5546
+	},
+	"Flowers-102": {
+		"train": 1020,
+		"validation": 1020,
+		"test": 6149
+	},
+	"Pet": {
+		"train": 3315,
+		"validation": 365,
+		"test": 3669
+	},
+	"Cars": {
+		"train": 7410,
+		"validation": 734,
+		"test": 8041
+	},
+	"Dogs": {
+		"train": 10800,
+		"validation": 1200,
+		"test": 8580
+	}
+}
