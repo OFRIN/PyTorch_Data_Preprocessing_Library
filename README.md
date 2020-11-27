@@ -1,7 +1,20 @@
 
 "OpenCV Encode -> Decode" vs "Pillow Encode -> Decode (ByteIO)" 비교
+"For -> Multi-processing -> Ray"
+Save Speed "Pickle -> Bytes"
+Save Size "Pickle -> Bytes"
+Load Speed "Pickle -> Bytes"
+Datasets
 
-"convert_OpenCV_to_PIL"의 단점 (속도 저하 원인)
+Pickle, Bytes
+893MB, 897MB
+
+Dictionary, List, Tuple
+0, -16Bytes, -20Bytes
+
+x18,000,000 
+0, -0.28GB -0.36GB
+""
 
 ```
 # 129sec - 7,500 images

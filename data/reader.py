@@ -1,102 +1,45 @@
 # Copyright (C) 2020 * Ltd. All rights reserved.
 # author : Sanghyeon Jo <josanghyeokn@gmail.com>
 
-import ray
-import copy
 import glob
 import torch
-import threading
 
 import numpy as np
 
-from queue import Queue
-from core.decode import decode_fn
+from torch.utils.data import Dataset, DataLoader
 
-from .utils import load_pickle
+from .utils import *
 
-class SH_Reader(threading.Thread):
-    def __init__(self, 
-        pattern, 
-        transform,
-        training,
-        batch_size,
-        output_names
-        ):
-        super().__init__()
-
-        self.paths = glob.glob(pattern)
+class SH_Dataset(Dataset):
+    def __init__(self, data_pattern, transform):
+        self.data_paths = glob.glob(data_pattern)
+        self.data_dic = {path : open(path, 'rb') for path in self.data_paths}
+        
+        self.dataset = []
         self.transform = transform
 
-        self.training = training
-        self.batch_size = batch_size
-        self.output_names = output_names
+        for path in self.data_paths:
+            for string in open(path.replace('.sang', '.index'), 'r').readlines():
+                start_point, length_of_example = string.strip().split(',')
+                self.dataset.append((path, int(start_point), int(length_of_example)))
 
-        self.queue = Queue(50)
-        self.the_number_of_loading_file = 5
+    def __len__(self):
+        return len(self.dataset)
 
-        self.progress = True
+    def decode(self, example):
+        image = decode_image(example['encoded_image'])
+        label = example['label']
+        return image, label
 
-        self.init()
-    
-    def init(self):
-        self.batch_dataset = {name : [] for name in self.output_names}
+    def get_example(self, data):
+        path, start_point, length_of_example = data
 
-    def generator(self):
-        if self.training:
-            np.random.shuffle(self.paths)
+        self.data_dic[path].seek(start_point - self.data_dic[path].tell(), 1)
+        bytes_of_example = self.data_dic[path].read(length_of_example)
 
-        dataset = copy.deepcopy(self.paths)
-        while len(dataset) > self.the_number_of_loading_file:
-            yield dataset[:self.the_number_of_loading_file]
-            dataset = dataset[self.the_number_of_loading_file:]
-        yield dataset
+        return deserialize(bytes_of_example)
 
-    def merge(self, data_list):
-        dataset = []
-        for data in data_list:
-            dataset += data
-        return dataset
+    def __getitem__(self, index):
+        example = self.get_example(self.dataset[index])
+        return self.decode(example)
 
-    def put(self):
-        self.queue.put([self.batch_dataset[name] for name in self.output_names])
-        self.init()
-
-    def get_length(self):
-        return len(self.batch_dataset[self.output_names[0]])
-
-    def update(self, results):
-        for result in results:
-            for name in self.output_names:
-                self.batch_dataset[name].append(result[name])
-
-            if self.get_length() == self.batch_size:
-                self.put()        
-
-    def run(self):
-        while self.progress:
-            for paths in self.generator():
-                examples_list = [load_pickle(path) for path in paths]
-                results = ray.get([decode_fn.remote(example, self.transform) for example in self.merge(examples_list)])
-                
-                if self.training:
-                    np.random.shuffle(results)
-
-                self.update(results)
-
-            if self.get_length() > 0 and not self.training:
-                self.put()
-
-            if not self.training:
-                self.progress = False
-            
-        self.queue.put(StopIteration)
-
-    def __iter__(self):
-        return self
-
-    def __next__(self):
-        data = self.queue.get()
-        if data == StopIteration:
-            raise StopIteration
-        return data
-        

@@ -14,11 +14,11 @@ def create_directory(path):
         os.makedirs(path)
     return path
 
-def load_pickle(pickle_path):
-    return pickle.load(open(pickle_path, 'rb'))
+def deserialize(data):
+    return pickle.loads(data)
 
-def dump_pickle(pickle_path, dataset):
-    return pickle.dump(dataset, open(pickle_path, 'wb'))
+def serialize(data):
+    return pickle.dumps(data)
 
 def encode_image(image_data):
     buffer = BytesIO()

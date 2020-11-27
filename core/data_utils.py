@@ -66,10 +66,10 @@ class Dataset(torch.utils.data.Dataset):
 
     def __len__(self):
         return len(self.image_names)
-
+    
     def __getitem__(self, index):
         image_name = self.image_names[index]
-
+        
         # image = cv2.imread(self.data_dir + image_name)
         try:
             image = Image.open(self.data_dir + image_name)
