@@ -28,6 +28,9 @@ class SH_Dataset(Dataset):
 
     def decode(self, example):
         image = decode_image(example['encoded_image'])
+        if self.transform is not None:
+            image = self.transform(image)
+
         label = example['label']
         return image, label
 
@@ -38,7 +41,7 @@ class SH_Dataset(Dataset):
         bytes_of_example = self.data_dic[path].read(length_of_example)
 
         return deserialize(bytes_of_example)
-
+    
     def __getitem__(self, index):
         example = self.get_example(self.dataset[index])
         return self.decode(example)
