@@ -30,7 +30,7 @@ class SH_Dataset(Dataset):
         image = decode_image(example['encoded_image'])
         if self.transform is not None:
             image = self.transform(image)
-
+        
         label = example['label']
         return image, label
 
